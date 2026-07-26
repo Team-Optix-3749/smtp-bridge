@@ -1,8 +1,15 @@
 const { SMTPServer } = require('smtp-server');
 const { simpleParser } = require('mailparser');
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: 'mail.smtp2go.com',
+  port: 2525,
+  auth: {
+    user: process.env.SMTP2GO_USERNAME,
+    pass: process.env.SMTP2GO_PASSWORD,
+  },
+});
 
 const server = new SMTPServer({
   authOptional: true,
@@ -15,18 +22,19 @@ const server = new SMTPServer({
       }
 
       try {
-        const result = await resend.emails.send({
+        const mailOptions = {
           from: parsed.from?.text || process.env.DEFAULT_FROM,
-          to: parsed.to?.value.map(t => t.address) || [],
+          to: parsed.to?.text || '',
           subject: parsed.subject || '(no subject)',
           text: parsed.text || '',
           html: parsed.html || undefined,
-        });
+        };
 
-        console.log('Sent via Resend:', result);
+        const result = await transporter.sendMail(mailOptions);
+        console.log('Sent via SMTP2GO:', result.messageId);
         callback();
       } catch (sendErr) {
-        console.error('Resend error:', sendErr);
+        console.error('SMTP2GO error:', sendErr);
         callback(sendErr);
       }
     });
