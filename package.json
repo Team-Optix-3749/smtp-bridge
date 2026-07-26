@@ -12,8 +12,6 @@
   "description": "",
   "dependencies": {
     "mailparser": "^3.9.14",
-    "nodemailer": "^9.0.3",
-    "resend": "^6.17.2",
     "smtp-server": "^3.19.2"
   }
 }
